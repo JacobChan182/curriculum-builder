@@ -124,6 +124,7 @@ export default function CourseList() {
               >
                 {course.title}
               </Link>
+              <Link to={`/courses/${course.id}/rudiments`} style={secondaryLink}>Rudiments</Link>
               <Link to={`/courses/${course.id}/edit`} style={linkButton}>Edit</Link>
               <button
                 type="button"
@@ -150,6 +151,15 @@ const linkButton: React.CSSProperties = {
   textDecoration: "none",
   border: "none",
   cursor: "pointer",
+};
+
+const secondaryLink: React.CSSProperties = {
+  padding: "8px 16px",
+  fontSize: 14,
+  color: "#a1a1aa",
+  textDecoration: "none",
+  border: "1px solid #3f3f46",
+  borderRadius: 6,
 };
 
 const secondaryButton: React.CSSProperties = {

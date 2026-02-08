@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   getLessonById,
   getLessonsByCourseId,
+  getCourseRudiments,
   createLesson,
   updateLesson,
   RUDIMENT_OPTIONS,
@@ -15,11 +16,22 @@ export default function LessonEdit() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [order, setOrder] = useState(0);
-  const [rudimentId, setRudimentId] = useState("");
+  const [rudimentIds, setRudimentIds] = useState<string[]>([]);
+  const [courseRudimentOptions, setCourseRudimentOptions] = useState<{ value: string; label: string }[]>([]);
   const [suggestedBpm, setSuggestedBpm] = useState<string>("");
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (courseId) {
+      getCourseRudiments(courseId).then((list) => {
+        setCourseRudimentOptions(
+          list.map((r) => ({ value: `course:${courseId}:${r.id}`, label: `${r.name} (course)` }))
+        );
+      });
+    }
+  }, [courseId]);
 
   useEffect(() => {
     if (isNew && courseId) {
@@ -34,13 +46,19 @@ export default function LessonEdit() {
       setTitle(l.title);
       setBody(l.body);
       setOrder(l.order);
-      setRudimentId(l.rudimentId ?? "");
+      setRudimentIds(l.rudimentIds ?? []);
       setSuggestedBpm(l.suggestedBpm != null ? String(l.suggestedBpm) : "");
     }).finally(() => {
       if (!cancelled) setLoading(false);
     });
     return () => { cancelled = true; };
   }, [lessonId, courseId, isNew]);
+
+  function toggleRudiment(value: string) {
+    setRudimentIds((prev) =>
+      prev.includes(value) ? prev.filter((id) => id !== value) : [...prev, value]
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,7 +73,7 @@ export default function LessonEdit() {
           title,
           body,
           order,
-          rudimentId: rudimentId.trim() || undefined,
+          rudimentIds,
           suggestedBpm: Number.isFinite(bpm) ? bpm : undefined,
         });
         navigate(`/courses/${courseId}/lessons`, { replace: true });
@@ -64,7 +82,7 @@ export default function LessonEdit() {
           title,
           body,
           order,
-          rudimentId: rudimentId.trim() || undefined,
+          rudimentIds,
           suggestedBpm: Number.isFinite(bpm) ? bpm : undefined,
         });
         navigate(`/courses/${courseId}/lessons`, { replace: true });
@@ -110,16 +128,32 @@ export default function LessonEdit() {
           onChange={(e) => setOrder(parseInt(e.target.value, 10) || 0)}
           style={inputStyle}
         />
-        <label style={{ display: "block", marginTop: 16, marginBottom: 8 }}>Rudiment (for "Practice this")</label>
-        <select
-          value={rudimentId}
-          onChange={(e) => setRudimentId(e.target.value)}
-          style={inputStyle}
-        >
+        <label style={{ display: "block", marginTop: 16, marginBottom: 8 }}>Rudiments in this lesson (student will practice these)</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {RUDIMENT_OPTIONS.map((opt) => (
-            <option key={opt.value || "none"} value={opt.value}>{opt.label}</option>
+            <label key={opt.value} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={rudimentIds.includes(opt.value)}
+                onChange={() => toggleRudiment(opt.value)}
+              />
+              <span>{opt.label}</span>
+            </label>
           ))}
-        </select>
+          {courseRudimentOptions.map((opt) => (
+            <label key={opt.value} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={rudimentIds.includes(opt.value)}
+                onChange={() => toggleRudiment(opt.value)}
+              />
+              <span>{opt.label}</span>
+            </label>
+          ))}
+          {RUDIMENT_OPTIONS.length === 0 && courseRudimentOptions.length === 0 && (
+            <span style={{ color: "#71717a", fontSize: 14 }}>Add global rudiments in RUDIMENT_OPTIONS or course rudiments in this course’s Rudiments page.</span>
+          )}
+        </div>
         <label style={{ display: "block", marginTop: 16, marginBottom: 8 }}>Suggested BPM (optional)</label>
         <input
           type="number"
