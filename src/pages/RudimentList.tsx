@@ -100,7 +100,6 @@ export default function RudimentList() {
         </div>
         <div style={{ display: "flex", gap: 12 }}>
           <Link to={`/courses/${courseId}/rudiments/new`} style={linkButton}>Add rudiment</Link>
-          <Link to={`/courses/${courseId}/lessons`} style={secondaryLink}>Lessons</Link>
           <button type="button" onClick={handleSignOut} style={secondaryButton}>Sign out</button>
         </div>
       </div>
@@ -147,15 +146,6 @@ const linkButton: React.CSSProperties = {
   textDecoration: "none",
   border: "none",
   cursor: "pointer",
-};
-
-const secondaryLink: React.CSSProperties = {
-  padding: "8px 16px",
-  fontSize: 14,
-  color: "#a1a1aa",
-  textDecoration: "none",
-  border: "1px solid #3f3f46",
-  borderRadius: 6,
 };
 
 const secondaryButton: React.CSSProperties = {

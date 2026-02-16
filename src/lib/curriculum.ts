@@ -8,13 +8,11 @@ import {
   getDocs,
   query,
   orderBy,
-  where,
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
-import type { Course, Lesson, CourseRudiment, PatternCell } from "@/types/curriculum";
+import type { Course, CourseRudiment, PatternCell } from "@/types/curriculum";
 
 const COURSES = "courses";
-const LESSONS = "lessons";
 const RUDIMENTS_SUB = "rudiments";
 const PATTERN_LENGTH = 32;
 
@@ -54,53 +52,6 @@ export async function getCourseById(courseId: string): Promise<Course | null> {
     title: data.title ?? "",
     description: data.description ?? "",
     order: typeof data.order === "number" ? data.order : 0,
-    updatedAt: data.updatedAt ?? "",
-  };
-}
-
-export async function getLessonsByCourseId(courseId: string): Promise<Lesson[]> {
-  const db = getFirebaseDb();
-  const ref = collection(db, LESSONS);
-  const q = query(ref, where("courseId", "==", courseId), orderBy("order"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => {
-    const data = d.data();
-    const rudimentIds = Array.isArray(data.rudimentIds)
-      ? data.rudimentIds
-      : data.rudimentId != null
-        ? [data.rudimentId]
-        : [];
-    return {
-      id: d.id,
-      courseId: data.courseId ?? courseId,
-      title: data.title ?? "",
-      body: data.body ?? "",
-      order: typeof data.order === "number" ? data.order : 0,
-      rudimentIds,
-      suggestedBpm: data.suggestedBpm,
-      updatedAt: data.updatedAt ?? "",
-    };
-  });
-}
-
-export async function getLessonById(lessonId: string): Promise<Lesson | null> {
-  const db = getFirebaseDb();
-  const snap = await getDoc(doc(db, LESSONS, lessonId));
-  if (!snap.exists()) return null;
-  const data = snap.data();
-  const rudimentIds = Array.isArray(data.rudimentIds)
-    ? data.rudimentIds
-    : data.rudimentId != null
-      ? [data.rudimentId]
-      : [];
-  return {
-    id: snap.id,
-    courseId: data.courseId ?? "",
-    title: data.title ?? "",
-    body: data.body ?? "",
-    order: typeof data.order === "number" ? data.order : 0,
-    rudimentIds,
-    suggestedBpm: data.suggestedBpm,
     updatedAt: data.updatedAt ?? "",
   };
 }
@@ -199,38 +150,3 @@ export async function deleteCourseRudiment(courseId: string, rudimentId: string)
   await deleteDoc(doc(db, COURSES, courseId, RUDIMENTS_SUB, rudimentId));
 }
 
-export async function createLesson(data: Omit<Lesson, "id" | "updatedAt">): Promise<string> {
-  const db = getFirebaseDb();
-  const ref = collection(db, LESSONS);
-  const docRef = await addDoc(ref, {
-    courseId: data.courseId,
-    title: data.title,
-    body: data.body,
-    order: data.order,
-    rudimentIds: data.rudimentIds ?? [],
-    ...(data.suggestedBpm != null && { suggestedBpm: data.suggestedBpm }),
-    updatedAt: now(),
-  });
-  return docRef.id;
-}
-
-export async function updateLesson(lessonId: string, data: Partial<Omit<Lesson, "id" | "courseId">>): Promise<void> {
-  const db = getFirebaseDb();
-  const payload: Record<string, unknown> = {
-    ...data,
-    rudimentIds: data.rudimentIds ?? [],
-    updatedAt: now(),
-  };
-  if (data.suggestedBpm === undefined) delete payload.suggestedBpm;
-  await setDoc(doc(db, LESSONS, lessonId), payload, { merge: true });
-}
-
-export async function deleteLesson(lessonId: string): Promise<void> {
-  const db = getFirebaseDb();
-  await deleteDoc(doc(db, LESSONS, lessonId));
-}
-
-/** All selectable rudiments for lessons (must match rhythm-app lib/rudiments). */
-export const RUDIMENT_OPTIONS = [
-  { value: "paradiddle-1", label: "Paradiddle" },
-];

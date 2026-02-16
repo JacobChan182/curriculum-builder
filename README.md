@@ -1,6 +1,6 @@
 # Curriculum Builder
 
-Admin web app to create and edit courses and lessons. Data is stored in the same Firestore project as the Rhythm app; the Learn tab in Rhythm reads this curriculum.
+Admin web app to create and edit courses and rudiments. Data is stored in the same Firestore project as the Rhythm app; the Learn tab in Rhythm reads this curriculum.
 
 ## Setup
 

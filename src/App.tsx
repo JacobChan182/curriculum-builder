@@ -4,8 +4,6 @@ import { useAdminCheck } from "./hooks/useAdminCheck";
 import Login from "./pages/Login";
 import CourseList from "./pages/CourseList";
 import CourseEdit from "./pages/CourseEdit";
-import LessonList from "./pages/LessonList";
-import LessonEdit from "./pages/LessonEdit";
 import RudimentList from "./pages/RudimentList";
 import RudimentEdit from "./pages/RudimentEdit";
 
@@ -84,30 +82,6 @@ export default function App() {
         element={
           <ProtectedAdmin>
             <RudimentEdit />
-          </ProtectedAdmin>
-        }
-      />
-      <Route
-        path="/courses/:courseId/lessons"
-        element={
-          <ProtectedAdmin>
-            <LessonList />
-          </ProtectedAdmin>
-        }
-      />
-      <Route
-        path="/courses/:courseId/lessons/new"
-        element={
-          <ProtectedAdmin>
-            <LessonEdit />
-          </ProtectedAdmin>
-        }
-      />
-      <Route
-        path="/courses/:courseId/lessons/:lessonId/edit"
-        element={
-          <ProtectedAdmin>
-            <LessonEdit />
           </ProtectedAdmin>
         }
       />

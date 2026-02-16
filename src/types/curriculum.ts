@@ -6,18 +6,6 @@ export interface Course {
   updatedAt: string;
 }
 
-export interface Lesson {
-  id: string;
-  courseId: string;
-  title: string;
-  body: string;
-  order: number;
-  /** Rudiment IDs for the student to learn in this lesson. */
-  rudimentIds: string[];
-  suggestedBpm?: number;
-  updatedAt: string;
-}
-
 /** One cell in a 32-note pattern: L, R, or rest (empty string). */
 export type PatternCell = "L" | "R" | "";
 

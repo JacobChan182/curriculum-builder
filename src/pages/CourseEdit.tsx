@@ -42,7 +42,7 @@ export default function CourseEdit() {
     try {
       if (isNew) {
         const id = await createCourse({ title, description, order });
-        navigate(`/courses/${id}/lessons`, { replace: true });
+        navigate(`/courses/${id}/rudiments`, { replace: true });
       } else {
         await updateCourse(courseId!, { title, description, order });
         navigate("/courses", { replace: true });
@@ -58,7 +58,7 @@ export default function CourseEdit() {
 
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: 24 }}>
-      <Link to={isNew ? "/courses" : `/courses/${courseId}/lessons`} style={{ color: "#22c55e", marginBottom: 16, display: "inline-block" }}>
+      <Link to={isNew ? "/courses" : `/courses/${courseId}/rudiments`} style={{ color: "#22c55e", marginBottom: 16, display: "inline-block" }}>
         ← Back
       </Link>
       <h1 style={{ fontSize: 24, marginBottom: 24 }}>{isNew ? "New course" : "Edit course"}</h1>
