@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "site": "crash-course-curriculum-builder",
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
