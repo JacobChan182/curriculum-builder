@@ -14,11 +14,15 @@ import type { Course, CourseRudiment, PatternCell } from "@/types/curriculum";
 
 const COURSES = "courses";
 const RUDIMENTS_SUB = "rudiments";
-const PATTERN_LENGTH = 32;
 
-function normalizePattern(raw: unknown[]): PatternCell[] {
+export const PATTERN_LENGTHS = {
+  sixteenth: 32,
+  eighthTriplet: 24,
+} as const;
+
+function normalizePattern(raw: unknown[], length: number): PatternCell[] {
   const out: PatternCell[] = [];
-  for (let i = 0; i < PATTERN_LENGTH; i++) {
+  for (let i = 0; i < length; i++) {
     const c = raw[i];
     out.push(c === "L" || c === "R" ? c : "");
   }
@@ -94,10 +98,13 @@ export async function getCourseRudiments(courseId: string): Promise<CourseRudime
   return snap.docs.map((d) => {
     const data = d.data();
     const raw = Array.isArray(data.pattern) ? data.pattern : [];
+    const sub = data.subdivision === "eighthTriplet" ? "eighthTriplet" : "sixteenth";
+    const len = PATTERN_LENGTHS[sub];
     return {
       id: d.id,
       name: data.name ?? "",
-      pattern: normalizePattern(raw),
+      pattern: normalizePattern(raw, len),
+      subdivision: sub,
       order: typeof data.order === "number" ? data.order : 0,
       updatedAt: data.updatedAt ?? "",
     };
@@ -110,10 +117,13 @@ export async function getCourseRudimentById(courseId: string, rudimentId: string
   if (!snap.exists()) return null;
   const data = snap.data();
   const raw = Array.isArray(data.pattern) ? data.pattern : [];
+  const sub = data.subdivision === "eighthTriplet" ? "eighthTriplet" : "sixteenth";
+  const len = PATTERN_LENGTHS[sub];
   return {
     id: snap.id,
     name: data.name ?? "",
-    pattern: normalizePattern(raw),
+    pattern: normalizePattern(raw, len),
+    subdivision: sub,
     order: typeof data.order === "number" ? data.order : 0,
     updatedAt: data.updatedAt ?? "",
   };
@@ -125,9 +135,11 @@ export async function createCourseRudiment(
 ): Promise<string> {
   const db = getFirebaseDb();
   const ref = collection(db, COURSES, courseId, RUDIMENTS_SUB);
+  const len = PATTERN_LENGTHS[data.subdivision ?? "sixteenth"];
   const docRef = await addDoc(ref, {
     name: data.name,
-    pattern: data.pattern.slice(0, PATTERN_LENGTH),
+    pattern: data.pattern.slice(0, len),
+    subdivision: data.subdivision ?? "sixteenth",
     order: data.order,
     updatedAt: now(),
   });
@@ -140,8 +152,11 @@ export async function updateCourseRudiment(
   data: Partial<Omit<CourseRudiment, "id">>
 ): Promise<void> {
   const db = getFirebaseDb();
+  const sub = data.subdivision ?? "sixteenth";
   const payload: Record<string, unknown> = { ...data, updatedAt: now() };
-  if (data.pattern) payload.pattern = data.pattern.slice(0, PATTERN_LENGTH);
+  if (data.pattern != null) {
+    payload.pattern = data.pattern.slice(0, PATTERN_LENGTHS[sub]);
+  }
   await setDoc(doc(db, COURSES, courseId, RUDIMENTS_SUB, rudimentId), payload, { merge: true });
 }
 
